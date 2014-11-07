@@ -10,7 +10,7 @@ class SwiftElkLoggingMiddleware(object):
         self.conf = conf
         self.logger = get_logger(conf, log_route='swift_elk_logging',
                                  fmt="%(message)s")
-        self.log_fm = '%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s'
+        self.log_fm = '%s,%s,%s,%s,%s,%s,%s,%s,"%s",%s,%s,%s'
 
     def __call__(self, env, start_response):
         req = Request(env)
