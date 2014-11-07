@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from swift.common.swob import Request
-from swift.common.utils import get_logger
+from swift.common.utils import get_logger, whataremyips
 
 
 class SwiftElkLoggingMiddleware(object):
@@ -15,14 +15,13 @@ class SwiftElkLoggingMiddleware(object):
     def __call__(self, env, start_response):
         req = Request(env)
         dt = datetime.now().timetuple()
-
+        server_ip = whataremyips()
         txd = req.environ['swift.trans_id']
         msg = self.log_fm % (dt[0], dt[1], dt[2], dt[3], dt[4], dt[5],
-                             req.method, req.path, req.params,
-                             '127.0.0.1', req.remote_addr, txd)
+                             server_ip[0], req.remote_addr, txd)
 
         def response_logging(status, response_headers, exc_info=None):
-            full_msg = '%s,%s' % (msg, str(status))
+            full_msg = '%s,%s' % (msg, status.split(' ', 1)[0])
             self.logger.info(full_msg)
             return start_response(status, response_headers, exc_info)
 
