@@ -18,6 +18,7 @@ class SwiftElkLoggingMiddleware(object):
         server_ip = whataremyips()
         txd = req.environ['swift.trans_id']
         msg = self.log_fm % (dt[0], dt[1], dt[2], dt[3], dt[4], dt[5],
+                             req.method, req.path, req.params,
                              server_ip[0], req.remote_addr, txd)
 
         def response_logging(status, response_headers, exc_info=None):
