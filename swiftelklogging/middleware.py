@@ -1,5 +1,7 @@
 from datetime import datetime
 from datetime import date
+from time import mktime
+
 from swift.common.swob import Request
 from swift.common.utils import get_logger, whataremyips
 from swift.common.utils import split_path
@@ -11,6 +13,7 @@ class SwiftElkLoggingMiddleware(object):
         self.conf = conf
         self.logger = get_logger(conf, log_route='swift_elk_logging')
         self.log_fm = '"%s",'   # ENV RAW
+        self.log_fm += '%f,'  # UNIX_TIMESTAMP
         self.log_fm += '%s,'  # DATE_YEAR
         self.log_fm += '%s,'  # DATE_MONTH
         self.log_fm += '%s,'  # DATE_DAY
@@ -32,7 +35,8 @@ class SwiftElkLoggingMiddleware(object):
     def __call__(self, env, start_response):
         req = Request(env)
         dt = datetime.now()
-        week_day = date.today().strftime("%a").lower()
+        ts = mktime(dt.timetuple()) + (dt.microsecond / 1000000.)
+        week_day = date.today().strftime("%a")
         server_ip = whataremyips()
         txd = req.environ['swift.trans_id']
 
@@ -44,10 +48,11 @@ class SwiftElkLoggingMiddleware(object):
         if obj is None:
             obj = ''
 
-        msg = self.log_fm % (env, dt.year, dt.month, dt.day, week_day, dt.hour,
-                             dt.minute, dt.second, dt.microsecond, req.method,
-                             req.path, container, obj, req.content_length,
-                             req.params, server_ip[0], req.remote_addr, txd)
+        msg = self.log_fm % (env, ts, dt.year, dt.month, dt.day, week_day,
+                             dt.hour, dt.minute, dt.second, dt.microsecond,
+                             req.method, req.path, container, obj,
+                             req.content_length, req.params, server_ip[0],
+                             req.remote_addr, txd)
 
         def response_logging(status, response_headers, exc_info=None):
             full_msg = '%s,%s' % (msg, status.split(' ', 1)[0])
