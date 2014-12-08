@@ -48,7 +48,9 @@ class SwiftElkLoggingMiddleware(object):
         if obj is None:
             obj = ''
 
-        msg = self.log_fm % (env, ts, dt.year, dt.month, dt.day, week_day,
+        str_env = str(env)
+        str_env = str_env.replace('"', '\'')
+        msg = self.log_fm % (str_env, ts, dt.year, dt.month, dt.day, week_day,
                              dt.hour, dt.minute, dt.second, dt.microsecond,
                              req.method, req.path, container, obj,
                              req.content_length, req.params, server_ip[0],
