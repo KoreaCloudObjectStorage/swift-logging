@@ -10,8 +10,10 @@ Install
 2) Alter your proxy-server.conf pipeline to have swift3:
 
     [pipeline:main]
-        pipeline = catch_errors cache swift_elk_logging swift3_gatekeeper
-        swift3 s3token authtoken keystone proxy-server
+        pipeline = catch_errors cache swift3_gatekeeper
+        swift3 s3token authtoken keystone swift_elk_logging proxy-server
+
+    ! swift_elk_logging middleware always located after auth middleware
 
 3) Add to your proxy-server.conf the section for the Swift3 WSGI filter::
 
