@@ -61,7 +61,7 @@ class SwiftElkLoggingMiddleware(object):
                              req.remote_addr, env['HTTP_USER_AGENT'], txd)
 
         def response_logging(status, response_headers, exc_info=None):
-            elapse = start_time - time.time()
+            elapse = time.time() - start_time
             full_msg = '%s,%s,%.8f' % (msg, status.split(' ', 1)[0], elapse)
             self.logger.info(full_msg)
             return start_response(status, response_headers, exc_info)
