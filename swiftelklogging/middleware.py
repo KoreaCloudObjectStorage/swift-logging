@@ -26,7 +26,7 @@ class SwiftElkLoggingMiddleware(object):
         self.log_fm += '%s,'  # HTTP_METHOD
         self.log_fm += '%s,'  # URL
         self.log_fm += '%s,'  # account
-        self.log_fm += '%s,'  # bucket
+        self.log_fm += '%s,'  # container
         self.log_fm += '%s,'  # object
         self.log_fm += '%s,'  # CONTENTS_LENGTH
         self.log_fm += '"%s",'  # PARAMETER
@@ -44,7 +44,7 @@ class SwiftElkLoggingMiddleware(object):
         txd = req.environ['swift.trans_id']
         start_time = time.time()
 
-        # URL format is http:[host]/bucket/object
+        # URL format is http:[host]/container/object
         version, account, container, obj = split_path(req.path, 1, 4, True)
 
         if container is None:
