@@ -1,4 +1,4 @@
-Source: swift-elk-logging
+Source: swift-logging
 Maintainer: A2 company <a2company@a2company.co.kr>
 Section: python
 Priority: optional
@@ -8,8 +8,8 @@ Build-Depends:
  debhelper (>= 7)
 Standards-Version: 3.9.1
 
-Package: python-swift-elk-logging
+Package: python-swift-logging
 Architecture: all
 Depends: ${misc:Depends}, ${python:Depends}
-Description: Middleware for logging to elk system
+Description: Middleware for swift logging system
 
