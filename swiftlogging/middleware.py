@@ -8,11 +8,11 @@ from swift.common.utils import get_logger, whataremyips
 from swift.common.utils import split_path
 
 
-class SwiftElkLoggingMiddleware(object):
+class SwiftLoggingMiddleware(object):
     def __init__(self, app, conf):
         self.app = app
         self.conf = conf
-        self.logger = get_logger(conf, log_route='swift_elk_logging')
+        self.logger = get_logger(conf, log_route='swift_logging')
         self.log_fm = '"%s",'   # ENV RAW
         self.log_fm += '%f,'  # UNIX_TIMESTAMP
         self.log_fm += '%s,'  # DATE_YEAR
@@ -77,6 +77,6 @@ def filter_factory(global_conf, **local_conf):
     conf.update(local_conf)
 
     def logger_filter(app):
-        return SwiftElkLoggingMiddleware(app, conf)
+        return SwiftLoggingMiddleware(app, conf)
 
     return logger_filter
