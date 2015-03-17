@@ -9,7 +9,7 @@ setup(name='swift_logging',
       author='a2company',
       author_email='admin@a2company.co.kr',
       packages=['swiftlogging'],
-      install_requires=['swift >= 1.13.0'],
+      install_requires=['swift >= 2.2.0'],
       entry_points={'paste.filter_factory':
                         ['swift_logging='
                          'swiftlogging.middleware:filter_factory']})
