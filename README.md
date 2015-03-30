@@ -22,6 +22,7 @@ Install
     set log_name = swift_logging
     set log_level = INFO
     set log_facility = LOG_LOCAL6
+    sentry_sdn = 125d6153cfcd4634bc6b06c6bb900a70@192.168.100.160:9000/2
 
 You also need to add the following in '/etc/rsyslog.d/10-swift.conf
 
