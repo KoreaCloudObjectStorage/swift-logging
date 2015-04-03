@@ -3,6 +3,8 @@ from datetime import datetime
 from datetime import date
 from time import mktime
 
+from raven import Client
+
 from swift.common.swob import Request
 from swift.common.utils import get_logger, whataremyips
 from swift.common.utils import split_path
@@ -12,6 +14,7 @@ class SwiftLoggingMiddleware(object):
     def __init__(self, app, conf):
         self.app = app
         self.conf = conf
+        self.client = Client(self.conf.get('sentry_sdn', ''))
         self.logger = get_logger(conf, log_route='swift_logging')
         self.log_fm = '"%s",'   # ENV RAW
         self.log_fm += '%f,'  # UNIX_TIMESTAMP
@@ -67,8 +70,12 @@ class SwiftLoggingMiddleware(object):
             full_msg = '%s,%s,%.8f' % (msg, status.split(' ', 1)[0], elapse)
             self.logger.info(full_msg)
             return start_response(status, response_headers, exc_info)
-
-        return self.app(env, response_logging)
+        try:
+            resp = self.app(env, response_logging)
+        except Exception:
+            self.client.captureException()
+            raise
+        return resp
 
 
 def filter_factory(global_conf, **local_conf):
