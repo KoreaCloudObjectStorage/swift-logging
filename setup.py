@@ -1,15 +1,18 @@
+#!/usr/bin/env python
+# Copyright (c) 2015 A2Company.
+#
+
 from setuptools import setup
 
-import swiftlogging
+# In python < 2.7.4, a lazy loading of package `pbr` will break
+# setuptools if some other modules registered functions in `atexit`.
+# solution from: http://bugs.python.org/issue15881#msg170215
+try:
+    import multiprocessing  # noqa
+except ImportError:
+    pass
 
-setup(name='swift_logging',
-      version=swiftlogging.version,
-      description='Middleware for swift logging system',
-      license='Apache License (2.0)',
-      author='a2company',
-      author_email='admin@a2company.co.kr',
-      packages=['swiftlogging'],
-      install_requires=['swift >= 2.2.0'],
-      entry_points={'paste.filter_factory':
-                        ['swift_logging='
-                         'swiftlogging.middleware:filter_factory']})
+setup(
+    setup_requires=['pbr'],
+    pbr=True
+) 
