@@ -10,6 +10,6 @@ Standards-Version: 3.9.1
 
 Package: python-swift-logging
 Architecture: all
-Depends: ${misc:Depends}, ${python:Depends}
+Depends: ${misc:Depends}
 Description: Middleware for swift logging system
 
