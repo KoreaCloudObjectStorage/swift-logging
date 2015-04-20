@@ -37,6 +37,7 @@ class SwiftLoggingMiddleware(object):
         self.log_fm += '%s,'  # REMOTE_IP
         self.log_fm += '%s,'  # User Agent
         self.log_fm += '%s'  # REQUEST_ID
+        self.location = self.conf.get('location', '')
 
     def __call__(self, env, start_response):
         req = Request(env)
@@ -55,23 +56,27 @@ class SwiftLoggingMiddleware(object):
         if obj is None:
             obj = ''
 
-        str_env = str(env)
-        str_env = str_env.replace('"', '\'')
-        user_agent = env['HTTP_USER_AGENT'] if 'HTTP_USER_AGENT' in env else \
-            ''
-        msg = self.log_fm % (str_env, ts, dt.year, dt.month, dt.day, week_day,
-                             dt.hour, dt.minute, dt.second, dt.microsecond,
-                             req.method, req.path, account, container, obj,
-                             req.content_length, req.params, server_ip[0],
-                             req.remote_addr, user_agent, txd)
+        f_arg = start_response
+        if self.location.lower() == 'proxy':
+            str_env = str(env)
+            str_env = str_env.replace('"', '\'')
+            user_agent = env['HTTP_USER_AGENT'] if 'HTTP_USER_AGENT' in env else ''
+            msg = self.log_fm % (str_env, ts, dt.year, dt.month, dt.day, week_day,
+                                 dt.hour, dt.minute, dt.second, dt.microsecond,
+                                 req.method, req.path, account, container, obj,
+                                 req.content_length, req.params, server_ip[0],
+                                 req.remote_addr, user_agent, txd)
 
-        def response_logging(status, response_headers, exc_info=None):
-            elapse = time.time() - start_time
-            full_msg = '%s,%s,%.8f' % (msg, status.split(' ', 1)[0], elapse)
-            self.logger.info(full_msg)
-            return start_response(status, response_headers, exc_info)
+            def response_logging(status, response_headers, exc_info=None):
+                elapse = time.time() - start_time
+                full_msg = '%s,%s,%.8f' % (msg, status.split(' ', 1)[0], elapse)
+                self.logger.info(full_msg)
+                return start_response(status, response_headers, exc_info)
+
+            f_arg = response_logging
+
         try:
-            resp = self.app(env, response_logging)
+            resp = self.app(env, f_arg)
         except Exception:
             self.client.captureException()
             raise
