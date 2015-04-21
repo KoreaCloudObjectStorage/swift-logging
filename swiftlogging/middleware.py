@@ -40,24 +40,24 @@ class SwiftLoggingMiddleware(object):
         self.location = self.conf.get('location', '')
 
     def __call__(self, env, start_response):
-        req = Request(env)
-        dt = datetime.now()
-        ts = mktime(dt.timetuple()) + (dt.microsecond / 1000000.)
-        week_day = date.today().strftime("%a")
-        server_ip = whataremyips()
-        txd = req.environ['swift.trans_id']
-        start_time = time.time()
-
-        # URL format is http:[host]/container/object
-        version, account, container, obj = split_path(req.path, 1, 4, True)
-
-        if container is None:
-            container = ''
-        if obj is None:
-            obj = ''
-
         f_arg = start_response
         if self.location.lower() == 'proxy':
+            req = Request(env)
+            dt = datetime.now()
+            ts = mktime(dt.timetuple()) + (dt.microsecond / 1000000.)
+            week_day = date.today().strftime("%a")
+            server_ip = whataremyips()
+            txd = req.environ['swift.trans_id']
+            start_time = time.time()
+
+            # URL format is http:[host]/container/object
+            version, account, container, obj = split_path(req.path, 1, 4, True)
+
+            if container is None:
+                container = ''
+            if obj is None:
+                obj = ''
+
             str_env = str(env)
             str_env = str_env.replace('"', '\'')
             user_agent = env['HTTP_USER_AGENT'] if 'HTTP_USER_AGENT' in env else ''
