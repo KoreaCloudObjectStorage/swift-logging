@@ -37,41 +37,46 @@ class SwiftLoggingMiddleware(object):
         self.log_fm += '%s,'  # REMOTE_IP
         self.log_fm += '%s,'  # User Agent
         self.log_fm += '%s'  # REQUEST_ID
+        self.location = self.conf.get('location', '')
 
     def __call__(self, env, start_response):
-        req = Request(env)
-        dt = datetime.now()
-        ts = mktime(dt.timetuple()) + (dt.microsecond / 1000000.)
-        week_day = date.today().strftime("%a")
-        server_ip = whataremyips()
-        txd = req.environ['swift.trans_id']
-        start_time = time.time()
+        f_arg = start_response
+        if self.location.lower() == 'proxy':
+            req = Request(env)
+            dt = datetime.now()
+            ts = mktime(dt.timetuple()) + (dt.microsecond / 1000000.)
+            week_day = date.today().strftime("%a")
+            server_ip = whataremyips()
+            txd = req.environ['swift.trans_id']
+            start_time = time.time()
 
-        # URL format is http:[host]/container/object
-        version, account, container, obj = split_path(req.path, 1, 4, True)
+            # URL format is http:[host]/container/object
+            version, account, container, obj = split_path(req.path, 1, 4, True)
 
-        if container is None:
-            container = ''
-        if obj is None:
-            obj = ''
+            if container is None:
+                container = ''
+            if obj is None:
+                obj = ''
 
-        str_env = str(env)
-        str_env = str_env.replace('"', '\'')
-        user_agent = env['HTTP_USER_AGENT'] if 'HTTP_USER_AGENT' in env else \
-            ''
-        msg = self.log_fm % (str_env, ts, dt.year, dt.month, dt.day, week_day,
-                             dt.hour, dt.minute, dt.second, dt.microsecond,
-                             req.method, req.path, account, container, obj,
-                             req.content_length, req.params, server_ip[0],
-                             req.remote_addr, user_agent, txd)
+            str_env = str(env)
+            str_env = str_env.replace('"', '\'')
+            user_agent = env['HTTP_USER_AGENT'] if 'HTTP_USER_AGENT' in env else ''
+            msg = self.log_fm % (str_env, ts, dt.year, dt.month, dt.day, week_day,
+                                 dt.hour, dt.minute, dt.second, dt.microsecond,
+                                 req.method, req.path, account, container, obj,
+                                 req.content_length, req.params, server_ip[0],
+                                 req.remote_addr, user_agent, txd)
 
-        def response_logging(status, response_headers, exc_info=None):
-            elapse = time.time() - start_time
-            full_msg = '%s,%s,%.8f' % (msg, status.split(' ', 1)[0], elapse)
-            self.logger.info(full_msg)
-            return start_response(status, response_headers, exc_info)
+            def response_logging(status, response_headers, exc_info=None):
+                elapse = time.time() - start_time
+                full_msg = '%s,%s,%.8f' % (msg, status.split(' ', 1)[0], elapse)
+                self.logger.info(full_msg)
+                return start_response(status, response_headers, exc_info)
+
+            f_arg = response_logging
+
         try:
-            resp = self.app(env, response_logging)
+            resp = self.app(env, f_arg)
         except Exception:
             self.client.captureException()
             raise
